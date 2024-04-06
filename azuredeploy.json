@@ -26,12 +26,7 @@
                 "description": "Enter app service plan here"
             }
         },
-        "name-of-public-address": {
-            "type": "string",
-            "metadata": {
-                "description": "Enter the public address here"
-            }
-        },
+        
         "name-of-virtual-network": {
             "type": "string",
             "metadata": {
@@ -60,6 +55,12 @@
             "type": "string",
             "metadata": {
                 "description": "Enter name of subnet 2"
+            }
+        },
+        "name-of-public-address": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter a public address here"
             }
         }  
     },
