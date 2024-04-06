@@ -7,7 +7,49 @@
         "metadata": {
             "description": "Enter the name the name of the storage account here."
         }
-      }  
+      },
+        "name-of-web-app": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter your web app name here"
+            }
+        },
+        "name-of-ubuntu-virtual-machine": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of ubuntu virtual machine here"
+            }
+        },
+        "name-of-app-service-plan": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter app service plan here"
+            }
+        },
+        "name-of-public-address": {
+            "type": "int",
+            "metadata": {
+                "description": "Enter the public address here"
+            }
+        },
+        "name-of-virtual-network": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of virtual network here"
+            }
+        },
+        "name-of-network-interface": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of network interface"
+            }
+        },
+        "name-of-network-security-group": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of network security group"
+            }
+        }  
     },
     "functions": [],
     "variables": {},
@@ -24,6 +66,292 @@
             "name": "Premium_LRS",
             "tier": "Premium"
         }
-    }],
+    },
+        {
+            "name": "[toLower(parameters('name-of-ubuntu-virtual-machine'))]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2023-01-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('name-of-ubuntu-virtual-machine')]"
+            },
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage"
+        },
+        {
+            "name": "[parameters('name-of-ubuntu-virtual-machine')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('name-of-ubuntu-virtual-machine')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(parameters('name-of-ubuntu-virtual-machine'))]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('name-of-ubuntu-virtual-machine')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgRule1",
+                        "properties": {
+                            "description": "description",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('name-of-virtual-network')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('name-of-network-security-group'))]"
+            ],
+            "tags": {
+                "displayName": "[parameters('name-of-virtual-network')]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('name-of-virtual-network')]",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('name-of-network-security-group'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('name-of-network-interface')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('name-of-public-address'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('name-of-virtual-network'))]"
+            ],
+            "tags": {
+                "displayName": "[parameters('name-of-network-interface')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('name-of-public-address'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'ubuntuVM1-VirtualNetwork', 'ubuntuVM1-VirtualNetwork-Subnet')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('name-of-ubuntu-virtual-machine')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2023-03-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('name-of-network-interface'))]"
+            ],
+            "tags": {
+                "displayName": "[parameters('name-of-ubuntu-virtual-machine')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_A2_v2"
+                },
+                "osProfile": {
+                    "computerName": "ubuntuVM1",
+                    "adminUsername": "adminUsername",
+                    "adminPassword": "adminPassword"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "ubuntuVM1-OSDisk",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('name-of-network-interface'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', toLower('ubuntuVM1storage'))).primaryEndpoints.blob]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[parameters('name-of-web-app')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/[appServicePlan1]')]": "Resource",
+                "displayName": "[parameters('name-of-web-app')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('name-of-app-service-plan'))]"
+            ],
+            "properties": {
+                "name": "[parameters('name-of-web-app')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('name-of-app-service-plan'))]"
+            }
+        },
+        {
+            "name": "[parameters('name-of-app-service-plan')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "tags": {
+                "displayName": "[parameters('name-of-app-service-plan')]"
+            },
+            "properties": {
+                "name": "[parameters('name-of-app-service-plan')]"
+            }
+        },
+        {
+            "name": "[parameters('name-of-public-address')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('name-of-public-address')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "dnsname1"
+                }
+            }
+        },
+        {
+            "name": "[parameters('name-of-virtual-network')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('name-of-virtual-network')]"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "Subnet-1",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "Subnet-2",
+                        "properties": {
+                            "addressPrefix": "10.0.1.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('name-of-network-security-group')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "nsgRule1",
+                        "properties": {
+                            "description": "description",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('name-of-network-interface')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2023-04-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('name-of-network-interface')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('name-of-virtual-network'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'virtualNetwork1', 'subnet1')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }],
     "outputs": {}
 }
