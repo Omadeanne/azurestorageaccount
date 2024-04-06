@@ -14,9 +14,9 @@
         "name-of-ubuntu-virtual-machine": {
             "value": "storageaccountoma24"
         },
-        "name-of-public-address": {
-            "value": "value"
-        },
+       "name-of-public-address": {
+        "value": "value"
+       },
         "name-of-virtual-network": {
             "value": "value"
         },
