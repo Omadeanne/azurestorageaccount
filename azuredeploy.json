@@ -27,7 +27,7 @@
             }
         },
         "name-of-public-address": {
-            "type": "int",
+            "type": "string",
             "metadata": {
                 "description": "Enter the public address here"
             }
