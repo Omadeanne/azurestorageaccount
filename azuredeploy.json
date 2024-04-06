@@ -49,6 +49,18 @@
             "metadata": {
                 "description": "Enter name of network security group"
             }
+        },
+        "name-of-subnet": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of subnet"
+            }
+        },
+        "name-of-subnet-2": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter name of subnet 2"
+            }
         }  
     },
     "functions": [],
@@ -290,13 +302,13 @@
                 },
                 "subnets": [
                     {
-                        "name": "Subnet-1",
+                        "name": "[parameters('name-of-subnet')]",
                         "properties": {
                             "addressPrefix": "10.0.0.0/24"
                         }
                     },
                     {
-                        "name": "Subnet-2",
+                        "name": "[parameters('name-of-subnet-2')]",
                         "properties": {
                             "addressPrefix": "10.0.1.0/24"
                         }
@@ -346,7 +358,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'virtualNetwork1', 'subnet1')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name-of-virtual-network'), parameters('name-of-subnet'))]"
                             }
                         }
                     }
