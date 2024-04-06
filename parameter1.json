@@ -13,6 +13,24 @@
         },
         "name-of-ubuntu-virtual-machine": {
             "value": "storageaccountoma24"
+        },
+        "name-of-public-address": {
+            "value": "value"
+        },
+        "name-of-virtual-network": {
+            "value": "value"
+        },
+        "name-of-network-interface": {
+            "value": "value"
+        },
+        "name-of-network-security-group": {
+            "value": "value"
+        },
+        "name-of-subnet": {
+            "value": "value"
+        },
+        "name-of-subnet-2": {
+            "value": "value"
         }
     }
     
