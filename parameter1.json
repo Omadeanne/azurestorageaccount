@@ -2,36 +2,26 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "name-of-storage-acc": {
-            "value": "storageaccountoma2"
+        "name-of-storage-account": {
+            "value": "value"
         },
-        "name-of-web-app": {
-            "value": "storageaccountoma22"
+        "name-of-public-ip-address": {
+            "value": "value"
         },
-        "name-of-app-service-plan": {
-            "value": "storageaccountoma23"
+        "name-of-network-security-group": {
+            "value": "value"
         },
-        "name-of-ubuntu-virtual-machine": {
-            "value": "storageaccountoma24"
-        },
-       "name-of-public-address": {
-        "value": "value"
-       },
         "name-of-virtual-network": {
             "value": "value"
         },
         "name-of-network-interface": {
             "value": "value"
         },
-        "name-of-network-security-group": {
+        "name-of-virtual-machine": {
             "value": "value"
         },
         "name-of-subnet": {
             "value": "value"
-        },
-        "name-of-subnet-2": {
-            "value": "value"
         }
     }
-    
 }
